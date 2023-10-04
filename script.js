@@ -41,7 +41,7 @@ window.onload = function () {
             //PROMISE
             Promise.all([processDashboard(dashboard)]).then((values) => {
                 if (values != 'error') {
-                    console.log('Excel Export with Sidebar - V1');
+                    console.log('Excel Export with Sidebar - V2');
                     // Hide the spinner and mask
                     window.top.Mask.hide();
                     window.top.Spinner.hide();
@@ -129,6 +129,7 @@ function processDashboard(dashboard) {
         let buildDataArr = [];
         let buildFilterDataArr = [];
         let buildParameterDataArr = [];
+        let buildFilterParamsDataArr = [];
         let buildGroupParameterDataArr = [];
         let buildSetParameterDataArr = [];
         let buildHeaderDataArr = [];
@@ -138,6 +139,7 @@ function processDashboard(dashboard) {
 
         //Identify the filters and parameters used in dashboard
         for (let object of dashboard.objects) {
+            console.log(object);
             if (object.type === 'quick-filter')
                 dashboardFilters.push(object.name);
             if (object.type === 'parameter-control')
@@ -169,10 +171,16 @@ function processDashboard(dashboard) {
                 for (let parameter of parameters) {
                     let tt = [];
                     for (let i = 0; i < 2; i++) {
-                        if (i == 0)
+                        if (i == 0) {
                             tt.push({ v: parameter.parameterName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } });
-                        else if (i == 1)
+
+                            buildFilterParamsDataArr.push({ v: parameter.parameterName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } });
+                        } else if (i == 1) {
                             tt.push({ v: parameter.parameterValue, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } });
+
+                            buildFilterParamsDataArr.push({ v: parameter.parameterValue, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } });
+                        }
+                            
                     }
                     buildParameterDataArr.push(tt);
                 }
@@ -287,10 +295,16 @@ function processDashboard(dashboard) {
                                         for (let filter of filters) {
                                             let tt = [];
                                             for (let i = 0; i < 2; i++) {
-                                                if (i == 0)
+                                                if (i == 0) {
                                                     tt.push({ v: filter.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } });
-                                                else if (i == 1)
+                                                
+                                                    buildFilterParamsDataArr.push({ v: filter.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } });
+                                                }
+                                                else if (i == 1) {
                                                     tt.push({ v: filter.filterValues, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } });
+
+                                                    buildFilterParamsDataArr.push({ v: filter.filterValues, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'right' } } })
+                                                }
                                             }
                                             buildFilterDataArr.push(tt);
                                         }
@@ -308,6 +322,7 @@ function processDashboard(dashboard) {
                                     columnLength = sheetData.columns.length;
                                     let columns = sheetData.columns;
                                     let slNoIndex = -1;
+                                    let hiddenColumns = [];
                                     let emptyColIndex = -1;
 
                                     /* Excel data type map */
@@ -337,6 +352,11 @@ function processDashboard(dashboard) {
                                         /* Get Sl_No index */
                                         if (colEle.fieldName === 'AGG(Sl_No)') {
                                             slNoIndex = i;
+                                        }
+
+                                        /* Get Index of Hidden Columns */
+                                        if (colEle.fieldName.startsWith('Hidden_')) {
+                                            hiddenColumns.push(i);
                                         }
 
                                         /* Get the empty column index */
@@ -397,6 +417,7 @@ function processDashboard(dashboard) {
                                     columnLength = measureNames.length > 0 ? columnLength - 2 + mCount : columnLength;
                                     columnLength = slNoIndex == -1 ? columnLength : columnLength - 1;
                                     columnLength = emptyColIndex == -1 ? columnLength : columnLength - 1;
+                                    columnLength = hiddenColumns.length === 0 ? columnLength : columnLength - hiddenColumns.length;
 
                                     //Build Report Header and Report Executed by row
                                     for (let i = 0; i < columnLength; i++) {
@@ -451,21 +472,21 @@ function processDashboard(dashboard) {
                                     //If Columns involve measures then apply the below logic
                                     if (measureNames.length > 0) {
                                         for (let i = 0; i < actualColumnLength; i++) {
-                                            if ((i != measureNamesIndex) && (i != measureValuesIndex) && (i != slNoIndex) && (i != emptyColIndex)) {
+                                            if ((i != measureNamesIndex) && (i != measureValuesIndex) && (i != slNoIndex) && (i != emptyColIndex) && !(hiddenColumns.includes(i))) {
                                                 let colEle = columns[i];
 
-                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(') || colEle.fieldName.startsWith('ATTR(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left' } } });
+                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(') || colEle.fieldName.startsWith('ATTR(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left', wrapText: '1' } } });
                                             }
                                         }
                                         for (let i = 0; i < measureNames.length; i++) {
-                                            tt.push({ v: measureNames[i], t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left' } } });
+                                            tt.push({ v: measureNames[i], t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left', wrapText: '1' } } });
                                         }
                                     } else { // If columns does not contain the measure names apply the below logic
-                                        for (let i = 0; i < columnLength; i++) {
+                                        for (let i = 0; i < actualColumnLength; i++) {
                                             let colEle = columns[i];
 
-                                            if ((i != slNoIndex) && (i != i != emptyColIndex)) {
-                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left' } } });
+                                            if ((i != slNoIndex) && (i !== emptyColIndex) && !(hiddenColumns.includes(i))) {
+                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left', wrapText: '1' } } });
                                             }
                                         }
                                     }
@@ -483,8 +504,8 @@ function processDashboard(dashboard) {
 
                                             if (lCount != 0) {
                                                 for (let j = 0; j < arrEle.length; j++) {
-                                                    if ((j != measureNamesIndex) && (j != measureValuesIndex) && (j != slNoIndex) && (j != emptyColIndex) && (lCount == mCount)) {
-                                                        tempArr.push({ v: arrEle[j].value == '%null%' ? '' : columnDataTypeMap[j] === 'date' || columnDataTypeMap[j] === 'date-time' ? arrEle[j].formattedValue.substring(0, arrEle[j].formattedValue.indexOf(" ") === -1 ? arrEle[j].formattedValue.length : arrEle[j].formattedValue.indexOf(" ")) : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } } });
+                                                    if ((j != measureNamesIndex) && (j != measureValuesIndex) && (j != slNoIndex) && !(hiddenColumns.includes(j)) && (j != emptyColIndex) && (lCount == mCount)) {
+                                                        tempArr.push({ v: arrEle[j].value == '%null%' ? '' : columnDataTypeMap[j] === 'date' || columnDataTypeMap[j] === 'date-time' ? arrEle[j].formattedValue.substring(0, arrEle[j].formattedValue.indexOf(" ") === -1 ? arrEle[j].formattedValue.length : arrEle[j].formattedValue.indexOf(" ")) : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } }, z: arrEle[j].value == '%null%' ? '' : (definedExcelDataTypeMap?.[columnDataTypeMap[j]] && definedExcelDataTypeMap?.[columnDataTypeMap[j]] === 'd') ? 'dd-mm-yyy' : '#,##0.00##############;-#,##0.00##############;0;General' });
                                                     }
                                                 }
                                                 tempDict[arrEle[measureNamesIndex].formattedValue] = arrEle[measureValuesIndex].value;
@@ -494,7 +515,7 @@ function processDashboard(dashboard) {
                                             if (lCount == 0) {
                                                 for (let j = 0; j < measureNames.length; j++) {
                                                     let tempData = tempDict[measureNames[j]];
-                                                    tempArr.push({ v: tempData == '%null%' ? '' : tempData, t: isNaN(tempData) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(tempData) ? { horizontal: 'left' } : { horizontal: 'right' } } });
+                                                    tempArr.push({ v: tempData == '%null%' ? '' : tempData, t: isNaN(tempData) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(tempData) ? { horizontal: 'left' } : { horizontal: 'right' } }, z: tempData == '%null%' ? '' : isNaN(tempData) ? '' : '#,##0.00##############;-#,##0.00##############;0;General' });
                                                 }
 
                                                 tempResult.push(tempArr);
@@ -511,8 +532,8 @@ function processDashboard(dashboard) {
                                             let arrEle = colData[i];
                                             let tempArr = [];
                                             for (let j = 0; j < arrEle.length; j++) {
-                                                if ((j != slNoIndex) && (j != emptyColIndex)) {
-                                                    tempArr.push({ v: arrEle[j].value == '%null%' ? '' : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } } });
+                                                if ((j != slNoIndex) && (j != emptyColIndex) && !(hiddenColumns.includes(j))) {
+                                                    tempArr.push({ v: arrEle[j].value == '%null%' ? '' : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } }, z: arrEle[j].value == '%null%' ? '' : (definedExcelDataTypeMap?.[columnDataTypeMap[j]] && definedExcelDataTypeMap?.[columnDataTypeMap[j]] === 'd') ? 'dd-mm-yyyy' : '#,##0.00##############;-#,##0.00##############;0;General' });
                                                 }
                                             }
 
@@ -534,6 +555,7 @@ function processDashboard(dashboard) {
                                     let sheetColumnLength = sheetData.columns.length;
                                     let columns = sheetData.columns;
                                     let slNoIndex = -1;
+                                    let hiddenColumns = [];
                                     let emptyColIndex = -1;
 
                                     /* Excel data type map */
@@ -563,6 +585,11 @@ function processDashboard(dashboard) {
                                         /* Get Sl_No index */
                                         if (colEle.fieldName === 'AGG(Sl_No)') {
                                             slNoIndex = i;
+                                        }
+
+                                        /* Get Index of Hidden Columns */
+                                        if (colEle.fieldName.startsWith('Hidden_')) {
+                                            hiddenColumns.push(i);
                                         }
 
                                         /* Get the empty column index */
@@ -621,26 +648,26 @@ function processDashboard(dashboard) {
                                     let actualColumnLength = sheetColumnLength;
                                     sheetColumnLength = measureNames.length > 0 ? sheetColumnLength - 2 + mCount : sheetColumnLength;
                                     sheetColumnLength = slNoIndex == -1 ? sheetColumnLength : sheetColumnLength - 1;
+                                    sheetColumnLength = hiddenColumns.length === 0 ? sheetColumnLength : sheetColumnLength - hiddenColumns.length;
                                     sheetColumnLength = emptyColIndex == -1 ? sheetColumnLength : sheetColumnLength - 1;
 
                                     //Column header data building
                                     if (measureNames.length > 0) {  //If measure names available
                                         for (let i = 0; i < actualColumnLength; i++) {
-                                            if ((i != measureNamesIndex) && (i != measureValuesIndex) && (i != slNoIndex) && (i != emptyColIndex)) {
+                                            if ((i != measureNamesIndex) && (i != measureValuesIndex) && (i != slNoIndex) && (i != emptyColIndex) && !(hiddenColumns.includes(i))) {
                                                 let colEle = columns[i];
-
-                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(') || colEle.fieldName.startsWith('ATTR(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left' } } });
+                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(') || colEle.fieldName.startsWith('ATTR(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left', wrapText: '1' } } });
                                             }
                                         }
                                         for (let i = 0; i < measureNames.length; i++) {
-                                            tt.push({ v: measureNames[i], t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left' } } });
+                                            tt.push({ v: measureNames[i], t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left', wrapText: '1' } } });
                                         }
                                     } else {  //If measure names not available
-                                        for (let i = 0; i < sheetColumnLength; i++) {
+                                        for (let i = 0; i < actualColumnLength; i++) {
                                             let colEle = columns[i];
 
-                                            if ((i != slNoIndex) && (i != i != emptyColIndex)) {
-                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left' } } });
+                                            if ((i !== slNoIndex) && (i !== emptyColIndex) && !(hiddenColumns.includes(i))) {
+                                                tt.push({ v: ((colEle.fieldName.startsWith('SUM(') || colEle.fieldName.startsWith('AGG(')) && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(4, colEle.fieldName.length - 1) : (colEle.fieldName.startsWith('ATTR(') && colEle.fieldName.endsWith(')')) ? colEle.fieldName.substring(5, colEle.fieldName.length - 1) : colEle.fieldName, t: 's', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, font: { sz: 11, name: 'Calibri', bold: true }, alignment: { horizontal: 'left', wrapText: '1' } } });
                                             }
                                         }
                                     }
@@ -657,8 +684,8 @@ function processDashboard(dashboard) {
 
                                             if (lCount != 0) {
                                                 for (let j = 0; j < arrEle.length; j++) {
-                                                    if ((j != measureNamesIndex) && (j != measureValuesIndex) && (j != slNoIndex) && (j != emptyColIndex) && (lCount == mCount)) {
-                                                        tempArr.push({ v: arrEle[j].value == '%null%' ? '' : columnDataTypeMap[j] === 'date' || columnDataTypeMap[j] === 'date-time' ? arrEle[j].formattedValue.substring(0, arrEle[j].formattedValue.indexOf(" ") === -1 ? arrEle[j].formattedValue.length : arrEle[j].formattedValue.indexOf(" ")) : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } } });
+                                                    if ((j != measureNamesIndex) && (j != measureValuesIndex) && (j != slNoIndex) && (j != emptyColIndex) && (lCount == mCount) && !(hiddenColumns.includes(j))) {
+                                                        tempArr.push({ v: arrEle[j].value == '%null%' ? '' : columnDataTypeMap[j] === 'date' || columnDataTypeMap[j] === 'date-time' ? arrEle[j].formattedValue.substring(0, arrEle[j].formattedValue.indexOf(" ") === -1 ? arrEle[j].formattedValue.length : arrEle[j].formattedValue.indexOf(" ")) : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } }, z: arrEle[j].value == '%null%' ? '' : (definedExcelDataTypeMap?.[columnDataTypeMap[j]] && definedExcelDataTypeMap?.[columnDataTypeMap[j]] === 'd') ? 'dd-mm-yyyy' : '#,##0.00##############;-#,##0.00##############;0;General' });
                                                     }
                                                 }
                                                 tempDict[arrEle[measureNamesIndex].formattedValue] = arrEle[measureValuesIndex].value;
@@ -668,7 +695,7 @@ function processDashboard(dashboard) {
                                             if (lCount == 0) {
                                                 for (let j = 0; j < measureNames.length; j++) {
                                                     let tempData = tempDict[measureNames[j]];
-                                                    tempArr.push({ v: tempData == '%null%' ? '' : tempData, t: isNaN(tempData) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(tempData) ? { horizontal: 'left' } : { horizontal: 'right' } } });
+                                                    tempArr.push({ v: tempData == '%null%' ? '' : tempData, t: isNaN(tempData) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(tempData) ? { horizontal: 'left' } : { horizontal: 'right' } }, z: tempData == '%null%' ? '' : isNaN(tempData) ? '' : '#,##0.00##############;-#,##0.00##############;0;General' });
                                                 }
 
                                                 tempResult.push(tempArr);
@@ -685,8 +712,8 @@ function processDashboard(dashboard) {
                                             let arrEle = colData[i];
                                             let tempArr = [];
                                             for (let j = 0; j < arrEle.length; j++) {
-                                                if ((j != slNoIndex) && (j != emptyColIndex)) {
-                                                    tempArr.push({ v: arrEle[j].value == '%null%' ? '' : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } } });
+                                                if ((j != slNoIndex) && (j != emptyColIndex) && !(hiddenColumns.includes(j))) {
+                                                    tempArr.push({ v: arrEle[j].value == '%null%' ? '' : arrEle[j].value, t: arrEle[j].value == '%null%' ? 's' : definedExcelDataTypeMap?.[columnDataTypeMap[j]] ? definedExcelDataTypeMap?.[columnDataTypeMap[j]] : isNaN(arrEle[j].value) ? 's' : 'n', s: { ...DEF_FxSz14RgbVert, border: { right: { style: 'thin', color: { rgb: '000000' } }, left: { style: 'thin', color: { rgb: '000000' } }, bottom: { style: 'thin', color: { rgb: '000000' } }, top: { style: 'thin', color: { rgb: '000000' } } }, alignment: isNaN(arrEle[j].value) ? { horizontal: 'left' } : { horizontal: 'right' } }, z: arrEle[j].value == '%null%' ? '' : (definedExcelDataTypeMap?.[columnDataTypeMap[j]] && definedExcelDataTypeMap?.[columnDataTypeMap[j]] === 'd') ? 'dd-mm-yyyy' : '#,##0.00##############;-#,##0.00##############;0;General' });
                                                 }
                                             }
 
@@ -737,9 +764,34 @@ function processDashboard(dashboard) {
                                     //Create final output
                                     resultSet.push([...[...buildHeaderDataArr]]);  //Header part
 
+                                    let trackColumnLength = 0;
+                                    let filterAndParamsResultSet = [];
+                                    let filterParamsCounter = 0;
+
+                                    for (let z = 0; z < buildFilterParamsDataArr.length; z+=2) {
+                                        if ((trackColumnLength + 2) > finalColumnLength) {
+                                            resultSet.push([...[filterAndParamsResultSet]]);
+                                            filterParamsCounter++;
+                                            filterAndParamsResultSet = [];
+                                            trackColumnLength = 0;
+                                            filterAndParamsResultSet.push(buildFilterParamsDataArr[z]);
+                                            filterAndParamsResultSet.push(buildFilterParamsDataArr[z + 1]);
+                                            trackColumnLength = trackColumnLength + 2;
+                                        } else {
+                                            filterAndParamsResultSet.push(buildFilterParamsDataArr[z]);
+                                            filterAndParamsResultSet.push(buildFilterParamsDataArr[z + 1]);
+                                            trackColumnLength = trackColumnLength + 2;
+                                        }
+                                    }
+
+                                    if (filterAndParamsResultSet.length > 0) {
+                                        resultSet.push([...[filterAndParamsResultSet]]);
+                                        filterParamsCounter++;
+                                    }
+
                                     //If filer or parameter present add them
-                                    buildFilterDataArr.length > 0 ? resultSet.push([...[...buildFilterDataArr]]) : null;
-                                    buildParameterDataArr.length > 0 ? resultSet.push([...[...buildParameterDataArr]]) : null;
+                                    // buildFilterDataArr.length > 0 ? resultSet.push([...[...buildFilterDataArr]]) : null;
+                                    // buildParameterDataArr.length > 0 ? resultSet.push([...[...buildParameterDataArr]]) : null;
 
                                     //If group parameters or set parameters present add them
                                     buildGroupParameterDataArr.length > 0 ? resultSet.push([...[...buildGroupParameterDataArr]]) : null;
@@ -757,9 +809,10 @@ function processDashboard(dashboard) {
                                             resultSet.push([...[...data.sheetData]]);
                                             resultSet.push([['', '']]);
                                         } else {
-                                            resultSet.push([...[...data.sheetData.slice(1)]]);
+                                            data.sheetData.length > 2 ? resultSet.push([...[...data.sheetData]]) : resultSet.push([...[...data.sheetData.slice(1)]]);
                                             resultSet.push([['', '']]);
                                             alternateWorksheetCount++;
+                                            data.sheetData.length > 2 && alternateWorksheetCount++;
                                         }
                                     });
 
@@ -779,8 +832,8 @@ function processDashboard(dashboard) {
                                     let rowFooterMergeStart = worksheetsToBeExtracted === 1 ? 
                                     8 + totalRowCount : 7 + alternateWorksheetCount + totalRowCount;
 
-                                    rowFooterMergeStart = filtersCounter !== 0 ? rowFooterMergeStart + filtersCounter : rowFooterMergeStart;
-                                    rowFooterMergeStart = parametersCounter !== 0 ? rowFooterMergeStart + parametersCounter : rowFooterMergeStart;
+                                    // rowFooterMergeStart = filtersCounter !== 0 ? rowFooterMergeStart + filtersCounter : rowFooterMergeStart;
+                                    rowFooterMergeStart = filterParamsCounter !== 0 ? rowFooterMergeStart + filterParamsCounter : rowFooterMergeStart;
                                     rowFooterMergeStart = groupParametersCounter !== 0 ? rowFooterMergeStart + groupParametersCounter : rowFooterMergeStart;
                                     rowFooterMergeStart = setParametersCounter !== 0 ? rowFooterMergeStart + setParametersCounter : rowFooterMergeStart;
 
